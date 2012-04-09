@@ -26,7 +26,7 @@ def getinstanceid():
   return id
 
 def getpid(pidfile):
-  p = open(pidfile,"ra")
+  p = open(pidfile,"r")
   # remove all trailing whitespace, especially the newline
   pid = p.readline().rstrip()
   return int(pid)
@@ -54,22 +54,23 @@ def uploadtos3(sourcefile,destinationfile):
   # upload the file
   k.set_contents_from_filename(sourcefile)
 
-# prep for rotate
-pid = getpid(pidfile)
-now = time.strftime('%Y%m%d-%H%M%S')
-oldname = logdir +"/"+                   filename
-newname = logdir +"/"+         now +'-'+ filename
-zipname = logdir +"/"+         now +'-'+ filename +'.gz'
-s3name = getinstanceid() +'-'+ now +'-'+ filename +'.gz'
-# rotate the logs
-os.rename(oldname,newname)
-# force nginx to logswitch
-os.kill(pid,signal.SIGUSR1)
-# wait for it to complete
-time.sleep(1)
-# gzip the file
-compressfile(newname,zipname)
-os.remove(newname)
-# push to s3
-uploadtos3(zipname,s3name)
+if __name__ == '__main__':
+	# prep for rotate
+	pid = getpid(pidfile)
+	now = time.strftime('%Y%m%d-%H%M%S')
+	oldname = logdir +"/"+                   filename
+	newname = logdir +"/"+         now +'-'+ filename
+	zipname = logdir +"/"+         now +'-'+ filename +'.gz'
+	s3name = getinstanceid() +'-'+ now +'-'+ filename +'.gz'
+	# rotate the logs
+	os.rename(oldname,newname)
+	# force nginx to logswitch
+	os.kill(pid,signal.SIGUSR1)
+	# wait for it to complete
+	time.sleep(1)
+	# gzip the file
+	compressfile(newname,zipname)
+	os.remove(newname)
+	# push to s3
+	uploadtos3(zipname,s3name)
 
