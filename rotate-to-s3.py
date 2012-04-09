@@ -79,7 +79,10 @@ if __name__ == '__main__':
 			oldname = logdir +"/"+                   filename
 			newname = logdir +"/"+         now +'-'+ filename
 			# rotate the logs
-			os.rename(oldname,newname)
+			try:
+				os.rename(oldname,newname)
+			except OSError as (errno, strerror):
+				print "Error moving {0} to {1}: {2}".format(oldname, newname, strerror)
 	# force nginx to logswitch
 	os.kill(pid,signal.SIGUSR1)
 	# wait for it to complete
@@ -91,8 +94,11 @@ if __name__ == '__main__':
 			newname = logdir +"/"+         now +'-'+ filename
 			zipname = logdir +"/"+         now +'-'+ filename +'.gz'
 			# gzip the file
-			compressfile(newname,zipname)
-			os.remove(newname)
+			try:
+				compressfile(newname,zipname)
+				os.remove(newname)
+			except IOError as (errno, strerror):
+				print "Error zipping {0} to {1}: {2}".format(newname, zipname, strerror)
 	# upload logs
 	for src in conf[u'source']:
 		logdir = src[u'directory']
@@ -100,5 +106,8 @@ if __name__ == '__main__':
 			zipname = logdir +"/"+         now +'-'+ filename +'.gz'
 			s3name = getinstanceid() +'-'+ now +'-'+ filename +'.gz'
 			# push to s3
-			uploadtos3(zipname,bucket,s3name)
+			try:
+				uploadtos3(zipname,bucket,s3name)
+			except IOError as (errno, strerror):
+				print "Error uploading {0} to {1}:{2}: {3}".format(zipname, bucket, s3name, strerror)
 
