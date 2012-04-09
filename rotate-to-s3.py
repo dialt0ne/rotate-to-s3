@@ -72,12 +72,13 @@ if __name__ == '__main__':
 	now = time.strftime('%Y%m%d-%H%M%S')
 	pid = getpid(conf[u'pidfile'])
 	bucket = conf[u'destination']
+	instanceid = getinstanceid();
 	# rename files prior to rotate
 	for src in conf[u'source']:
 		logdir = src[u'directory']
 		for filename in src[u'files']:
-			oldname = logdir +"/"+                   filename
-			newname = logdir +"/"+         now +'-'+ filename
+			oldname = logdir +"/"+    filename
+			newname = logdir +"/"+    now +'-'+ filename
 			# rotate the logs
 			try:
 				os.rename(oldname,newname)
@@ -91,8 +92,8 @@ if __name__ == '__main__':
 	for src in conf[u'source']:
 		logdir = src[u'directory']
 		for filename in src[u'files']:
-			newname = logdir +"/"+         now +'-'+ filename
-			zipname = logdir +"/"+         now +'-'+ filename +'.gz'
+			newname = logdir +"/"+    now +'-'+ filename
+			zipname = logdir +"/"+    now +'-'+ filename +'.gz'
 			# gzip the file
 			try:
 				compressfile(newname,zipname)
@@ -103,8 +104,8 @@ if __name__ == '__main__':
 	for src in conf[u'source']:
 		logdir = src[u'directory']
 		for filename in src[u'files']:
-			zipname = logdir +"/"+         now +'-'+ filename +'.gz'
-			s3name = getinstanceid() +'-'+ now +'-'+ filename +'.gz'
+			zipname = logdir +"/"+    now +'-'+ filename +'.gz'
+			s3name = instanceid +'-'+ now +'-'+ filename +'.gz'
 			# push to s3
 			try:
 				uploadtos3(zipname,bucket,s3name)
