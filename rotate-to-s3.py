@@ -103,14 +103,18 @@ if __name__ == '__main__':
 		for filename in src['files']:
 			oldname = logdir +"/"+                   filename
 			newname = logdir +"/"+         now +'-'+ filename
-			zipname = logdir +"/"+         now +'-'+ filename +'.gz'
-			s3name = getinstanceid() +'-'+ now +'-'+ filename +'.gz'
 			# rotate the logs
 			os.rename(oldname,newname)
-			# force nginx to logswitch
-			os.kill(pid,signal.SIGUSR1)
-			# wait for it to complete
-			time.sleep(1)
+	# force nginx to logswitch
+	os.kill(pid,signal.SIGUSR1)
+	# wait for it to complete
+	time.sleep(1)
+	for src in conf['source']:
+		logdir = src['directory']
+		for filename in src['files']:
+			newname = logdir +"/"+         now +'-'+ filename
+			zipname = logdir +"/"+         now +'-'+ filename +'.gz'
+			s3name = getinstanceid() +'-'+ now +'-'+ filename +'.gz'
 			# gzip the file
 			compressfile(newname,zipname)
 			os.remove(newname)
