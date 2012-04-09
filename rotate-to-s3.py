@@ -66,41 +66,15 @@ def uploadtos3(sourcefile,bucket,destinationfile):
   # upload the file
   k.set_contents_from_filename(sourcefile)
 
-def _decode_list(data):
-    rv = []
-    for item in data:
-        if isinstance(item, unicode):
-            item = item.encode('utf-8')
-        elif isinstance(item, list):
-            item = _decode_list(item)
-        elif isinstance(item, dict):
-            item = _decode_dict(item)
-        rv.append(item)
-    return rv
-
-def _decode_dict(data):
-    rv = {}
-    for key, value in data.iteritems():
-        if isinstance(key, unicode):
-           key = key.encode('utf-8')
-        if isinstance(value, unicode):
-           value = value.encode('utf-8')
-        elif isinstance(value, list):
-           value = _decode_list(value)
-        elif isinstance(value, dict):
-           value = _decode_dict(value)
-        rv[key] = value
-    return rv
-
 if __name__ == '__main__':
-	conf = json.loads(config, object_hook=_decode_dict)
+	conf = json.loads(config)
 	# prep for rotate
 	now = time.strftime('%Y%m%d-%H%M%S')
-	pid = getpid(conf['pidfile'])
-	bucket = conf['destination']
-	for src in conf['source']:
-		logdir = src['directory']
-		for filename in src['files']:
+	pid = getpid(conf[u'pidfile'])
+	bucket = conf[u'destination']
+	for src in conf[u'source']:
+		logdir = src[u'directory']
+		for filename in src[u'files']:
 			oldname = logdir +"/"+                   filename
 			newname = logdir +"/"+         now +'-'+ filename
 			# rotate the logs
@@ -109,9 +83,9 @@ if __name__ == '__main__':
 	os.kill(pid,signal.SIGUSR1)
 	# wait for it to complete
 	time.sleep(1)
-	for src in conf['source']:
-		logdir = src['directory']
-		for filename in src['files']:
+	for src in conf[u'source']:
+		logdir = src[u'directory']
+		for filename in src[u'files']:
 			newname = logdir +"/"+         now +'-'+ filename
 			zipname = logdir +"/"+         now +'-'+ filename +'.gz'
 			s3name = getinstanceid() +'-'+ now +'-'+ filename +'.gz'
