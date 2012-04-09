@@ -22,8 +22,8 @@ def getinstanceid():
   resp, content = h.request("http://169.254.169.254/latest/meta-data/instance-id", "GET")
   # strip out the leading 'i-'
   match = re.search('i-(.+)',content)
-  id = match.group(1)
-  return id
+  instanceid = match.group(1)
+  return instanceid
 
 def getpid(pidfile):
   p = open(pidfile,"r")
