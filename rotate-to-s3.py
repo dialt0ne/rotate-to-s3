@@ -88,10 +88,14 @@ if __name__ == '__main__':
 		for filename in src[u'files']:
 			newname = logdir +"/"+         now +'-'+ filename
 			zipname = logdir +"/"+         now +'-'+ filename +'.gz'
-			s3name = getinstanceid() +'-'+ now +'-'+ filename +'.gz'
 			# gzip the file
 			compressfile(newname,zipname)
 			os.remove(newname)
+	for src in conf[u'source']:
+		logdir = src[u'directory']
+		for filename in src[u'files']:
+			zipname = logdir +"/"+         now +'-'+ filename +'.gz'
+			s3name = getinstanceid() +'-'+ now +'-'+ filename +'.gz'
 			# push to s3
 			uploadtos3(zipname,bucket,s3name)
 
