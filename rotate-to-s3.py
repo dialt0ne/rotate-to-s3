@@ -72,6 +72,7 @@ if __name__ == '__main__':
 	now = time.strftime('%Y%m%d-%H%M%S')
 	pid = getpid(conf[u'pidfile'])
 	bucket = conf[u'destination']
+	# rename files prior to rotate
 	for src in conf[u'source']:
 		logdir = src[u'directory']
 		for filename in src[u'files']:
@@ -83,6 +84,7 @@ if __name__ == '__main__':
 	os.kill(pid,signal.SIGUSR1)
 	# wait for it to complete
 	time.sleep(1)
+	# compress logs
 	for src in conf[u'source']:
 		logdir = src[u'directory']
 		for filename in src[u'files']:
@@ -91,6 +93,7 @@ if __name__ == '__main__':
 			# gzip the file
 			compressfile(newname,zipname)
 			os.remove(newname)
+	# upload logs
 	for src in conf[u'source']:
 		logdir = src[u'directory']
 		for filename in src[u'files']:
