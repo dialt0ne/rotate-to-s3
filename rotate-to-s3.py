@@ -42,56 +42,51 @@ def compressFile(sourcefile,destinationfile):
     with gzip.open(destinationfile, 'wb') as f_out:
       f_out.writelines(f_in)
 
-def testS3(access,secret,now):
-  # connect to s3
+def testS3(access,secret,iid,now):
   c = boto.connect_s3(access,secret)
-  # create/open bucket
   b = c.create_bucket(bucket)
-  # set the key
   k = boto.s3.key.Key(b)
-  k.key = now+'-test'
-  # upload the file
+  # only a test key
+  test_key = iid+"-"+now+"-test"
+  k.key = test_key
+  # with test data
   k.set_contents_from_string('Testing S3 at '+now)
   k.delete()
 
 def uploadtoS3(access,secret,sourcefile,bucket,destinationfile):
-  # connect to s3
   c = boto.connect_s3(access,secret)
-  # create/open bucket
   b = c.create_bucket(bucket)
-  # set the key
   k = boto.s3.key.Key(b)
   k.key = destinationfile
-  # upload the file
   k.set_contents_from_filename(sourcefile)
 
 if __name__ == '__main__':
+  now = time.strftime('%Y%m%d-%H%M%S')
   parser = argparse.ArgumentParser(prog='rotate-to-s3.py')
   parser.add_argument("-c","--config",dest="config",default=defaultConfigFile,
-    help="config file (json), default: "+defaultConfigFile)
+                      help="config file (json), default: "+defaultConfigFile)
   args = parser.parse_args()
   try:
     conf = getConf(args.config)
   except IOError as (errno, strerror):
     print "Error opening config file {0}: {1}, quitting".format(args.config, strerror)
     sys.exit(1)
-  # prep for rotate
-  now = time.strftime('%Y%m%d-%H%M%S')
   try:
     pid = getPid(conf[u'pidfile'])
   except IOError as (errno, strerror):
     print "Error opening pid file {0}: {1}, quitting".format(conf[u'pidfile'], strerror)
     sys.exit(1)
-  bucket = conf[u'destination']
-  aws_access_key = conf[u'access']
-  aws_secret_access_key = conf[u'secret']
   try:
     instanceId = getInstanceId()
   except:
     print "Error getting EC2 instance id, quitting"
     sys.exit(1)
+  # try connecting to S3 before we even start
+  bucket = conf[u'destination']
+  aws_access_key = conf[u'access']
+  aws_secret_access_key = conf[u'secret']
   try:
-    testS3(aws_access_key,aws_secret_access_key,now)
+    testS3(aws_access_key,aws_secret_access_key,instanceId,now)
   except boto.exception.NoAuthHandlerFound:
     print "S3 authentication error, quitting"
     sys.exit(2)
@@ -108,13 +103,13 @@ if __name__ == '__main__':
   for src in conf[u'source']:
     logdir = src[u'directory']
     for filename in src[u'files']:
-      oldName = logdir +"/"+    filename
+      oldName = logdir+"/"+filename
       oldSize = 0
       if os.path.isfile(oldName) == True:
         oldSize = os.stat(oldName).st_size
       if oldSize == 0:
         break
-      newName = logdir +"/"+    now +'-'+ filename
+      newName = logdir+"/"+now+'-'+ filename
       # rotate the logs
       try:
         os.rename(oldName,newName)
@@ -128,10 +123,10 @@ if __name__ == '__main__':
   for src in conf[u'source']:
     logdir = src[u'directory']
     for filename in src[u'files']:
-      newName = logdir +"/"+    now +'-'+ filename
+      newName = logdir+"/"+now+'-'+filename
       if os.path.isfile(newName) == False:
         break
-      zipName = logdir +"/"+    now +'-'+ filename +'.gz'
+      zipName = logdir+"/"+now+'-'+filename+'.gz'
       # gzip the file
       try:
         compressFile(newName,zipName)
@@ -144,10 +139,10 @@ if __name__ == '__main__':
   for src in conf[u'source']:
     logdir = src[u'directory']
     for filename in src[u'files']:
-      zipName = logdir +"/"+    now +'-'+ filename +'.gz'
+      zipName = logdir+"/"+now+'-'+filename+'.gz'
       if os.path.isfile(zipName) == False:
         break
-      s3Name = instanceId +'-'+ now +'-'+ filename +'.gz'
+      s3Name = instanceId+'-'+now+'-'+filename+'.gz'
       # push to s3
       try:
         uploadtoS3(aws_access_key,aws_secret_access_key,zipName,bucket,s3Name)
