@@ -24,10 +24,16 @@ def getinstanceid():
   instanceid = match.group(1)
   return instanceid
 
+def getconf(filename):
+  with open(filename,'r') as f:
+    config = f.read()
+    c = json.loads(config)
+  return c
+
 def getpid(pidfile):
-  p = open(pidfile,"r")
-  # remove all trailing whitespace, especially the newline
-  pid = p.readline().rstrip()
+  with open(pidfile,'r') as p:
+    # remove all trailing whitespace, especially the newline
+    pid = f.readline().rstrip()
   return int(pid)
 
 def compressfile(sourcefile,destinationfile):
@@ -65,19 +71,25 @@ def uploadtoS3(access,secret,sourcefile,bucket,destinationfile):
 
 if __name__ == '__main__':
 	try:
-		with open(configfile,'r') as f:
-			config = f.read()
+		conf = getconf(configfile)
 	except IOError as (errno, strerror):
 		print "Error opening config file {0}: {1}".format(configfile, strerror)
 		sys.exit(1)
-	conf = json.loads(config)
 	# prep for rotate
 	now = time.strftime('%Y%m%d-%H%M%S')
-	pid = getpid(conf[u'pidfile'])
+	try:
+		pid = getpid(conf[u'pidfile'])
+	except IOError as (errno, strerror):
+		print "Error opening pid file {0}: {1}".format(conf[u'pidfile'], strerror)
+		sys.exit(1)
 	bucket = conf[u'destination']
 	aws_access_key = conf[u'access']
 	aws_secret_access_key = conf[u'secret']
-	instanceid = getinstanceid();
+	try:
+		instanceid = getinstanceid()
+	except:
+		print "Error getting EC2 instance id"
+		sys.exit(1)
 	try:
 		testS3(aws_access_key,aws_secret_access_key,now)
 	except boto.exception.NoAuthHandlerFound:
