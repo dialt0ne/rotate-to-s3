@@ -70,7 +70,7 @@ def uploadtoS3(access, secret, bucket, sourcefile, destinationfile):
 
 
 if __name__ == '__main__':
-
+    logging.basicConfig(format="rotate-to-s3.py: %(message)s")
     now = time.strftime('%Y%m%d-%H%M%S')
     parser = argparse.ArgumentParser(prog='rotate-to-s3.py')
     parser.add_argument("-c", "--config", dest="config",
