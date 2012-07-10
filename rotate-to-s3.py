@@ -73,14 +73,14 @@ if __name__ == '__main__':
 	try:
 		conf = getconf(configfile)
 	except IOError as (errno, strerror):
-		print "Error opening config file {0}: {1}".format(configfile, strerror)
+		print "Error opening config file {0}: {1}, quitting".format(configfile, strerror)
 		sys.exit(1)
 	# prep for rotate
 	now = time.strftime('%Y%m%d-%H%M%S')
 	try:
 		pid = getpid(conf[u'pidfile'])
 	except IOError as (errno, strerror):
-		print "Error opening pid file {0}: {1}".format(conf[u'pidfile'], strerror)
+		print "Error opening pid file {0}: {1}, quitting".format(conf[u'pidfile'], strerror)
 		sys.exit(1)
 	bucket = conf[u'destination']
 	aws_access_key = conf[u'access']
@@ -88,7 +88,7 @@ if __name__ == '__main__':
 	try:
 		instanceid = getinstanceid()
 	except:
-		print "Error getting EC2 instance id"
+		print "Error getting EC2 instance id, quitting"
 		sys.exit(1)
 	try:
 		testS3(aws_access_key,aws_secret_access_key,now)
@@ -96,10 +96,10 @@ if __name__ == '__main__':
 		print "S3 authentication error, quitting"
 		sys.exit(2)
 	except boto.exception.S3CreateError as (status, reason):
-		print "S3 Error creating {0}:{1}: {2}".format(bucket, now+'test', reason)
+		print "S3 Error creating {0}:{1}: {2}, quitting".format(bucket, now+'test', reason)
 		sys.exit(2)
 	except boto.exception.S3PermissionsError as (reason):
-		print "S3 Error with permissions on {0}:{1}: {2}".format(bucket, now+'test', reason)
+		print "S3 Error with permissions on {0}:{1}: {2}, quitting".format(bucket, now+'test', reason)
 		sys.exit(2)
 	except:
 		print "S3 unknown error, quitting"
