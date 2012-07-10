@@ -42,7 +42,7 @@ def compressFile(sourcefile,destinationfile):
     with gzip.open(destinationfile, 'wb') as f_out:
       f_out.writelines(f_in)
 
-def testS3(access,secret,iid,now):
+def testS3(access,secret,bucket,iid,now):
   c = boto.connect_s3(access,secret)
   b = c.create_bucket(bucket)
   k = boto.s3.key.Key(b)
@@ -53,7 +53,7 @@ def testS3(access,secret,iid,now):
   k.set_contents_from_string('Testing S3 at '+now)
   k.delete()
 
-def uploadtoS3(access,secret,sourcefile,bucket,destinationfile):
+def uploadtoS3(access,secret,bucket,sourcefile,destinationfile):
   c = boto.connect_s3(access,secret)
   b = c.create_bucket(bucket)
   k = boto.s3.key.Key(b)
@@ -64,7 +64,7 @@ if __name__ == '__main__':
   now = time.strftime('%Y%m%d-%H%M%S')
   parser = argparse.ArgumentParser(prog='rotate-to-s3.py')
   parser.add_argument("-c","--config",dest="config",default=defaultConfigFile,
-                      help="config file (json), default: "+defaultConfigFile)
+                      help="json config file, default: "+defaultConfigFile)
   args = parser.parse_args()
   try:
     conf = getConf(args.config)
@@ -86,7 +86,7 @@ if __name__ == '__main__':
   aws_access_key = conf[u'access']
   aws_secret_access_key = conf[u'secret']
   try:
-    testS3(aws_access_key,aws_secret_access_key,instanceId,now)
+    testS3(aws_access_key,aws_secret_access_key,bucket,instanceId,now)
   except boto.exception.NoAuthHandlerFound:
     print "S3 authentication error, quitting"
     sys.exit(2)
@@ -145,7 +145,7 @@ if __name__ == '__main__':
       s3Name = instanceId+'-'+now+'-'+filename+'.gz'
       # push to s3
       try:
-        uploadtoS3(aws_access_key,aws_secret_access_key,zipName,bucket,s3Name)
+        uploadtoS3(aws_access_key,aws_secret_access_key,bucket,zipName,s3Name)
         os.remove(zipName)
       except IOError as (errno, strerror):
         print "Error uploading {0} to {1}:{2}: {3}".format(zipName, bucket, s3Name, strerror)
