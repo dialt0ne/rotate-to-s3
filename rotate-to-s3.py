@@ -99,7 +99,8 @@ if __name__ == '__main__':
     aws_access_key = conf[u'access']
     aws_secret_access_key = conf[u'secret']
     try:
-        testS3(aws_access_key, aws_secret_access_key, bucket, instanceId, now)
+        testS3(aws_access_key, aws_secret_access_key,
+               bucket, instanceId, now)
     except boto.exception.NoAuthHandlerFound:
         logging.error("S3 authentication error, quitting")
         sys.exit(2)
