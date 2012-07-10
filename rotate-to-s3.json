@@ -1,0 +1,16 @@
+{
+    "destination": "myBucket",
+    "access": "ABCDEFGHIJKLMNOPQRSTU",
+    "secret": "SUMthefiveboxingwizardsjumpedquickly",
+    "source": [
+        {
+            "directory": "/var/log/nginx",
+            "files": [
+                "access.log",
+                "error.log"
+            ]
+        }
+    ],
+    "pidfile": "/var/run/nginx.pid"
+}
+
