@@ -10,23 +10,10 @@ import json
 import os
 import re
 import signal
+import sys
 import time
 
-config = """
-{
-    "destination": "live-test-logs",
-    "source": [
-        {
-            "directory": "/var/www/logs",
-            "files": [
-                "healthguru.access.log",
-                "healthguru.stage.access.log"
-            ]
-        }
-    ],
-    "pidfile": "/var/run/nginx.pid"
-}
-"""
+configfile = "rotate-to-s3.json"
 
 def getinstanceid():
   h = httplib2.Http()
@@ -53,37 +40,74 @@ def compressfile(sourcefile,destinationfile):
   f_out.close()
   f_in.close()
 
-def uploadtos3(sourcefile,bucket,destinationfile):
+def testS3(access,secret,now):
   # connect to s3
-  #c = boto.connect_s3(AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY)
-  c = boto.connect_s3()
+  c = boto.connect_s3(access,secret)
   # create/open bucket
   b = c.create_bucket(bucket)
   # set the key
-  from boto.s3.key import Key
-  k = Key(b)
+  k = boto.s3.key.Key(b)
+  k.key = now+'-test'
+  # upload the file
+  k.set_contents_from_string('Testing S3 at '+now)
+  k.delete()
+
+def uploadtoS3(access,secret,sourcefile,bucket,destinationfile):
+  # connect to s3
+  c = boto.connect_s3(access,secret)
+  # create/open bucket
+  b = c.create_bucket(bucket)
+  # set the key
+  k = boto.s3.key.Key(b)
   k.key = destinationfile
   # upload the file
   k.set_contents_from_filename(sourcefile)
 
 if __name__ == '__main__':
+	try:
+		with open(configfile,'r') as f:
+			config = f.read()
+	except IOError as (errno, strerror):
+		print "Error opening config file {0}: {1}".format(configfile, strerror)
+		sys.exit(1)
 	conf = json.loads(config)
 	# prep for rotate
 	now = time.strftime('%Y%m%d-%H%M%S')
 	pid = getpid(conf[u'pidfile'])
 	bucket = conf[u'destination']
+	aws_access_key = conf[u'access']
+	aws_secret_access_key = conf[u'secret']
 	instanceid = getinstanceid();
+	try:
+		testS3(aws_access_key,aws_secret_access_key,now)
+	except boto.exception.NoAuthHandlerFound:
+		print "S3 authentication error, quitting"
+		sys.exit(2)
+	except boto.exception.S3CreateError as (status, reason):
+		print "S3 Error creating {0}:{1}: {2}".format(bucket, now+'test', reason)
+		sys.exit(2)
+	except boto.exception.S3PermissionsError as (reason):
+		print "S3 Error with permissions on {0}:{1}: {2}".format(bucket, now+'test', reason)
+		sys.exit(2)
+	except:
+		print "S3 unknown error, quitting"
+		sys.exit(2)
 	# rename files prior to rotate
 	for src in conf[u'source']:
 		logdir = src[u'directory']
 		for filename in src[u'files']:
 			oldname = logdir +"/"+    filename
+			oldsize = 0
+			if os.path.isfile(oldname) == True:
+				oldsize = os.stat(oldname).st_size
+			if oldsize == 0:
+				break
 			newname = logdir +"/"+    now +'-'+ filename
 			# rotate the logs
 			try:
 				os.rename(oldname,newname)
 			except OSError as (errno, strerror):
-				print "Error moving {0} to {1}: {2}".format(oldname, newname, strerror)
+				print "Error renaming {0} to {1}: {2}".format(oldname, newname, strerror)
 	# force nginx to logswitch
 	os.kill(pid,signal.SIGUSR1)
 	# wait for it to complete
@@ -93,6 +117,8 @@ if __name__ == '__main__':
 		logdir = src[u'directory']
 		for filename in src[u'files']:
 			newname = logdir +"/"+    now +'-'+ filename
+			if os.path.isfile(newname) == False:
+				break
 			zipname = logdir +"/"+    now +'-'+ filename +'.gz'
 			# gzip the file
 			try:
@@ -100,15 +126,27 @@ if __name__ == '__main__':
 				os.remove(newname)
 			except IOError as (errno, strerror):
 				print "Error zipping {0} to {1}: {2}".format(newname, zipname, strerror)
+			except OSError as (errno, strerror):
+				print "Error removing after zip {0}: {1}".format(newname, strerror)
 	# upload logs
 	for src in conf[u'source']:
 		logdir = src[u'directory']
 		for filename in src[u'files']:
 			zipname = logdir +"/"+    now +'-'+ filename +'.gz'
+			if os.path.isfile(zipname) == False:
+				break
 			s3name = instanceid +'-'+ now +'-'+ filename +'.gz'
 			# push to s3
 			try:
-				uploadtos3(zipname,bucket,s3name)
+				uploadtoS3(aws_access_key,aws_secret_access_key,zipname,bucket,s3name)
+				os.remove(zipname)
 			except IOError as (errno, strerror):
 				print "Error uploading {0} to {1}:{2}: {3}".format(zipname, bucket, s3name, strerror)
+			except OSError as (errno, strerror):
+				print "Error removing after upload {0}: {1}".format(zipname, strerror)
+			except boto.exception.S3CreateError as (status, reason):
+				print "S3 Error creating {0}:{1}: {2}".format(bucket, s3name, reason)
+			except boto.exception.S3PermissionsError as (reason):
+				print "S3 Error with permissions on {0}:{1}: {2}".format(bucket, s3name, reason)
+			
 
