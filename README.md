@@ -9,6 +9,8 @@ an Amazon Web Service Simple Storage Service (AWS S3) bucket:
 * compresses old logfiles
 * uploads compessed logfiles to an S3 bucket
 
+If the init script is installed, it will also move the logs to S3 on
+shutdown or reboot so that no logs are lost at instance termination.
 
 ### How to install
 
@@ -18,6 +20,8 @@ an Amazon Web Service Simple Storage Service (AWS S3) bucket:
 	sudo cp rotate-to-s3.py /opt/corsis/bin
 	sudo mkdir -p /opt/corsis/etc
 	sudo cp rotate-to-s3.json /opt/corsis/etc/example_com.json
+	sudo rotate-to-s3 /etc/init.d/rotate-to-s3
+	sudo update-rc.d rotate-to-s3 stop 01 0 1 6 .
 
 ### Configuration
 
