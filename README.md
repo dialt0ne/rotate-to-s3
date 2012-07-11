@@ -12,7 +12,6 @@ an Amazon Web Service Simple Storage Service (AWS S3) bucket:
 
 ### How to install
 
-	SITENAME="example_com"
 	git clone git://github.com/dialt0ne/rotate-to-s3.git
 	cd rotate-to-s3
 	sudo mkdir -p /opt/corsis/bin
@@ -32,11 +31,11 @@ an Amazon Web Service Simple Storage Service (AWS S3) bucket:
 
 ### Usage
 
-$ ./rotate-to-s3.py -h
-usage: rotate-to-s3.py [-h] [-c CONFIG]
+	$ ./rotate-to-s3.py -h
+	usage: rotate-to-s3.py [-h] [-c CONFIG]
 
-optional arguments:
-  -h, --help            show this help message and exit
-  -c CONFIG, --config CONFIG
-                        json config file, default: rotate-to-s3.json
+	optional arguments:
+	  -h, --help            show this help message and exit
+	  -c CONFIG, --config CONFIG
+				json config file, default: rotate-to-s3.json
 
