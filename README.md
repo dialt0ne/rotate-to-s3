@@ -4,7 +4,7 @@ rotate-to-s3.py does the following to rotate your webserver logs directly to
 an Amazon Web Service Simple Storage Service (AWS S3) bucket:
 
 * reads the JSON configuration file
-* renamed active logfiles
+* renames active logfiles
 * signals the webserver to logswitch
 * compresses old logfiles
 * uploads compessed logfiles to an S3 bucket
