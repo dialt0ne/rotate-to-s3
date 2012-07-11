@@ -1,0 +1,8 @@
+#!/bin/sh
+#
+# rotate-to-s3        move logs to s3 at shutdown
+#
+# chkconfig: - 01 01
+# description: move logs to s3 at shutdown
+#
+/opt/corsis/bin/rotate-to-s3.py
