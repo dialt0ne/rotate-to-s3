@@ -123,7 +123,7 @@ if __name__ == '__main__':
             oldSize = 0
             if os.path.isfile(oldName) == True:
                 oldSize = os.stat(oldName).st_size
-			# don't bother with zero-length logfiles
+            # don't bother with zero-length logfiles
             if oldSize == 0:
                 break
             newName = logdir + "/" + now + '-' + filename
