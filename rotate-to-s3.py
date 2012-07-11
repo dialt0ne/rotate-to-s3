@@ -110,7 +110,7 @@ if __name__ == '__main__':
         sys.exit(2)
     except boto.exception.S3PermissionsError as (reason):
         logging.error("S3 Error with permissions on %s:%s: %s, quitting",
-                      bucket, now + 'test', reason)
+                      bucket, iid + "-" + now + "-test", reason)
         sys.exit(2)
     except:
         logging.error("S3 unknown error, quitting")
@@ -123,6 +123,7 @@ if __name__ == '__main__':
             oldSize = 0
             if os.path.isfile(oldName) == True:
                 oldSize = os.stat(oldName).st_size
+			# don't bother with zero-length logfiles
             if oldSize == 0:
                 break
             newName = logdir + "/" + now + '-' + filename
@@ -132,7 +133,7 @@ if __name__ == '__main__':
             except OSError as (errno, strerror):
                 logging.error("Error renaming %s to %s: %s",
                               oldName, newName, strerror)
-    # force nginx to logswitch
+    # force process to logswitch
     os.kill(pid, signal.SIGUSR1)
     # wait for it to complete
     time.sleep(1)
