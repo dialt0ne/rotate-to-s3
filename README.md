@@ -1,6 +1,7 @@
 ## rotate-to-s3.py
 
-rotate-to-s3.py does the following to rotate your webserver logs directly to
+rotate-to-s3.py does the following to rotate your webserver logs from your
+Amazon Web Service Elastic Compute Cloud (AWS EC2) instance directly to
 an Amazon Web Service Simple Storage Service (AWS S3) bucket:
 
 * reads the JSON configuration file
@@ -8,6 +9,10 @@ an Amazon Web Service Simple Storage Service (AWS S3) bucket:
 * signals the webserver to logswitch
 * compresses old logfiles
 * uploads compessed logfiles to an S3 bucket
+
+e.g If the logfile is named `access.log` it will be rotated to S3 with
+the name `90abcdef-YYYYMMDD-HHMMSS-access.log` where `90abcdef` is the
+EC2 instance ID of the system, without the leading 'i-'.
 
 If the init script is installed, it will also move the logs to S3 on
 shutdown or reboot so that no logs are lost at instance termination.
