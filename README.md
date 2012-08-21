@@ -10,9 +10,9 @@ an Amazon Web Service Simple Storage Service (AWS S3) bucket:
 * compresses old logfiles
 * uploads compessed logfiles to an S3 bucket
 
-e.g If the logfile is named `access.log` it will be rotated to S3 with
-the name `90abcdef-YYYYMMDD-HHMMSS-access.log` where `90abcdef` is the
-EC2 instance ID of the system, without the leading 'i-'.
+So, if the logfile is named `access.log` it will be rotated to S3 with
+the name `90abcdef-YYYYMMDD-HHMMSS-access.log.gz` where `90abcdef` is the
+EC2 instance ID of the system, without the leading `i-`.
 
 If the init script is installed, it will also move the logs to S3 on
 shutdown or reboot so that no logs are lost at instance termination.
