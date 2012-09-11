@@ -50,6 +50,11 @@ shutdown or reboot so that no logs are lost at instance termination.
 	  -c CONFIG, --config CONFIG
 				json config file, default: rotate-to-s3.json
 
+### ToDo
+
+* possibly retry on S3 upload issues
+* better error handling and reporting
+
 ### License
 
 Copyright 2012 Corsis
