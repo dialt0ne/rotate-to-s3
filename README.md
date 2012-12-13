@@ -12,7 +12,8 @@ an Amazon Web Service Simple Storage Service (AWS S3) bucket:
 
 So, if the logfile is named `access.log` it will be rotated to S3 with
 the name `90abcdef-YYYYMMDD-HHMMSS-access.log.gz` where `90abcdef` is the
-EC2 instance ID of the system, without the leading `i-`.
+EC2 instance ID of the system, without the leading `i-` (see this
+[blog post](http://aws.typepad.com/aws/2012/03/amazon-s3-performance-tips-tricks-seattle-hiring-event.html) why).
 
 If the init script is installed, it will also move the logs to S3 on
 shutdown or reboot so that no logs are lost at instance termination.
