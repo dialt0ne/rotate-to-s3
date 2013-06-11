@@ -27,7 +27,7 @@ shutdown or reboot so that no logs are lost at instance termination.
 	sudo mkdir -p /opt/corsis/bin
 	sudo cp rotate-to-s3.py /opt/corsis/bin
 	sudo mkdir -p /opt/corsis/etc
-	sudo cp rotate-to-s3.json /opt/corsis/etc/example_com.json
+	sudo cp rotate-to-s3.json /opt/corsis/etc
 	sudo cp rotate-to-s3 /etc/init.d/rotate-to-s3
 	sudo update-rc.d rotate-to-s3 stop 01 0 1 6 .
 
@@ -39,7 +39,7 @@ shutdown or reboot so that no logs are lost at instance termination.
 
 	sudo crontab -e
 	#>>>
-	0 * * * * /opt/corsis/bin/rotate-to-s3.py -c /opt/corsis/etc/example_com.json
+	0 * * * * /opt/corsis/bin/rotate-to-s3.py -c /opt/corsis/etc/rotate-to-s3.json
 
 ### Usage
 

@@ -31,7 +31,7 @@ import signal
 import sys
 import time
 
-defaultConfigFile = "rotate-to-s3.json"
+defaultConfigFile = "/opt/corsis/etc/rotate-to-s3.json"
 
 
 def getInstanceId():
@@ -126,7 +126,7 @@ if __name__ == '__main__':
         sys.exit(2)
     except boto.exception.S3PermissionsError as (reason):
         logging.error("S3 Error with permissions on %s:%s: %s, quitting",
-                      bucket, iid + "-" + now + "-test", reason)
+                      bucket, instanceId + "-" + now + "-test", reason)
         sys.exit(2)
     except:
         logging.error("S3 unknown error, quitting")
@@ -137,7 +137,7 @@ if __name__ == '__main__':
         for filename in src[u'files']:
             oldName = logdir + "/" + filename
             oldSize = 0
-            if os.path.isfile(oldName) == True:
+            if os.path.isfile(oldName) is True:
                 oldSize = os.stat(oldName).st_size
             # don't bother with zero-length logfiles
             if oldSize == 0:
@@ -158,7 +158,7 @@ if __name__ == '__main__':
         logdir = src[u'directory']
         for filename in src[u'files']:
             newName = logdir + "/" + now + '-' + filename
-            if os.path.isfile(newName) == False:
+            if os.path.isfile(newName) is False:
                 break
             zipName = logdir + "/" + now + '-' + filename + '.gz'
             # gzip the file
@@ -176,7 +176,7 @@ if __name__ == '__main__':
         logdir = src[u'directory']
         for filename in src[u'files']:
             zipName = logdir + "/" + now + '-' + filename + '.gz'
-            if os.path.isfile(zipName) == False:
+            if os.path.isfile(zipName) is False:
                 break
             s3Name = instanceId + '-' + now + '-' + filename + '.gz'
             # push to s3
@@ -194,5 +194,5 @@ if __name__ == '__main__':
                 logging.error("S3 Error creating %s:%s: %s",
                               bucket, s3Name, reason)
             except boto.exception.S3PermissionsError as (reason):
-                loggin.error("S3 Error with permissions on %s:%s: %s",
-                             bucket, s3Name, reason)
+                logging.error("S3 Error with permissions on %s:%s: %s",
+                              bucket, s3Name, reason)
