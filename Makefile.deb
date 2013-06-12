@@ -1,0 +1,30 @@
+NAME=rotate-to-s3
+VERSION=1.0
+MAINT="Anthony Tonns <atonns@corsis.com>"
+VENDOR="Corsis"
+URL="https://github.com/dialt0ne/rotate-to-s3"
+DESCR="Script to rotate webserver log file to AWS S3"
+LICENSE="Apache2.0"
+
+.PHONY: package
+package: $(NAME)_$(VERSION)_all.deb
+$(NAME)_$(VERSION)_all.deb: rotate-to-s3.py rotate-to-s3.json rotate-to-s3
+	rm -rf p
+	mkdir p
+	mkdir p/opt
+	mkdir p/opt/corsis
+	mkdir p/opt/corsis/bin
+	mkdir p/opt/corsis/etc
+	cp -p rotate-to-s3.py p/opt/corsis/bin/
+	cp -p rotate-to-s3.json p/opt/corsis/etc/
+	mkdir p/etc
+	mkdir p/etc/init.d
+	cp -p rotate-to-s3 p/etc/init.d/
+	fpm -s dir -t deb -C p -a all \
+		-m $(MAINT) --vendor $(VENDOR) --description $(DESCR) \
+		--url $(URL) -n $(NAME) -v $(VERSION) --license $(LICENSE) \
+		opt etc
+	rm -rf p
+
+clean:
+	rm -rf $(NAME)_$(VERSION)_all.deb
