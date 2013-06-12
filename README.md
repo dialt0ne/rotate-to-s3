@@ -31,7 +31,7 @@ shutdown or reboot so that no logs are lost at instance termination.
 ### Configuration
 
     cd /opt/corsis/etc
-    sudo $EDITOR example_com.json
+    sudo $EDITOR rotate-to-s3.json
     # customize as needed
 
     sudo crontab -e
