@@ -22,34 +22,31 @@ shutdown or reboot so that no logs are lost at instance termination.
 
 #### Ubuntu system
 
-	git clone git://github.com/dialt0ne/rotate-to-s3.git
-	cd rotate-to-s3
-	sudo mkdir -p /opt/corsis/bin
-	sudo cp rotate-to-s3.py /opt/corsis/bin
-	sudo mkdir -p /opt/corsis/etc
-	sudo cp rotate-to-s3.json /opt/corsis/etc
-	sudo cp rotate-to-s3 /etc/init.d/rotate-to-s3
-	sudo update-rc.d rotate-to-s3 stop 01 0 1 6 .
+    git clone git://github.com/dialt0ne/rotate-to-s3.git
+    which fpm || echo "ERROR: requires fpm"
+    make -f Makefile.deb
+    sudo dpkg -i rotate-to-s3_1.0_all.deb
+    sudo update-rc.d rotate-to-s3 defaults
 
 ### Configuration
 
-	cd /opt/corsis/etc
-	sudo $EDITOR example_com.json
-	# customize as needed
+    cd /opt/corsis/etc
+    sudo $EDITOR example_com.json
+    # customize as needed
 
-	sudo crontab -e
-	#>>>
-	0 * * * * /opt/corsis/bin/rotate-to-s3.py -c /opt/corsis/etc/rotate-to-s3.json
+    sudo crontab -e
+    #>>>
+    0 * * * * /opt/corsis/bin/rotate-to-s3.py -c /opt/corsis/etc/rotate-to-s3.json
 
 ### Usage
 
-	$ ./rotate-to-s3.py -h
-	usage: rotate-to-s3.py [-h] [-c CONFIG]
+    $ ./rotate-to-s3.py -h
+    usage: rotate-to-s3.py [-h] [-c CONFIG]
 
-	optional arguments:
-	  -h, --help            show this help message and exit
-	  -c CONFIG, --config CONFIG
-				json config file, default: rotate-to-s3.json
+    optional arguments:
+      -h, --help            show this help message and exit
+      -c CONFIG, --config CONFIG
+    			json config file, default: rotate-to-s3.json
 
 ### ToDo
 
