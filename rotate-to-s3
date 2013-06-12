@@ -5,6 +5,12 @@
 # chkconfig: - 01 01
 # description: move logs to s3 at shutdown
 #
+# Provides:          rotate-to-s3
+# X-Stop-After:      $nginx
+# Default-Stop:      0 1 6
+# Short-Description: rotate-to-s3
+# Description:       Calls python script to rotate logs to AWS S3
+#
 #   Copyright 2012 Corsis
 #   http://www.corsis.com/
 #
