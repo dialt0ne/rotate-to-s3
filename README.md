@@ -28,6 +28,10 @@ shutdown or reboot so that no logs are lost at instance termination.
     sudo dpkg -i rotate-to-s3_1.0_all.deb
     sudo update-rc.d rotate-to-s3 defaults
 
+#### Chef
+
+See: https://github.com/dialt0ne/cookbook-rotate-to-s3
+
 ### Configuration
 
     cd /opt/corsis/etc
