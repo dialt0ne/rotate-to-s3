@@ -1,3 +1,5 @@
+[![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=dialt0ne&url=https://github.com/dialt0ne/rotate-to-s3&title=rotate-to-s3&language=python&tags=github&category=software)
+
 ## rotate-to-s3.py
 
 rotate-to-s3.py does the following to rotate your webserver logs from your
